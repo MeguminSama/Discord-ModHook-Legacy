@@ -13,7 +13,7 @@
 
 Windows only... for now (until I get the windows version in a state I'm happy with)
 
-Currently the script copies `app.asar` to `_app.asar` to function, even though they're the same file.
+Currently the script copies `app.asar` to `_app.asar` in order to function, even though they're the same file.
 This is because I haven't found an easy way to differentiate between win32 calls to the "modified" asar file (whenever it needs to call `resources/vencord.asasr`)
 and the "original" asar file (whenever it needs to call `app.asar` in %localappdata%)
 
