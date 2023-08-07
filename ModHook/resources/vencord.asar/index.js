@@ -1,1 +1,0 @@
-require("C:\\Users\\megu\\Workspace\\Discord\\Vencord\\dist\\patcher.js")
