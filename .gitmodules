@@ -1,0 +1,9 @@
+[submodule "extern/Detours"]
+	path = extern/detours_lib/Detours
+	url = https://github.com/microsoft/Detours
+[submodule "extern/--force"]
+	path = extern/--force
+	url = https://github.com/CLIUtils/CLI11
+[submodule "extern/CLI11"]
+	path = extern/CLI11
+	url = https://github.com/CLIUtils/CLI11
