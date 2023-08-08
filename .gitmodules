@@ -1,0 +1,3 @@
+[submodule "ModHook/Detours"]
+	path = ModHook/Detours
+	url = https://github.com/microsoft/Detours
