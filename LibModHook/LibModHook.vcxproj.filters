@@ -15,13 +15,13 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <None Include="cpp.hint" />
+  </ItemGroup>
+  <ItemGroup>
     <ClInclude Include="framework.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ModHookInjection.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\ModHook\ModHook.h">
+    <ClInclude Include="LibModHook.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\ModHook\Detours\src\detours.h">
@@ -30,12 +30,15 @@
     <ClInclude Include="..\ModHook\Detours\src\detver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\ModHook\ModHook.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="dllmain.cpp">
+    <ClCompile Include="LibModHook.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\ModHook\ModHook.cpp">
+    <ClCompile Include="dllmain.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\ModHook\Detours\src\creatwth.cpp">
@@ -71,11 +74,8 @@
     <ClCompile Include="..\ModHook\Detours\src\uimports.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\ModHook\Detours\src\Makefile" />
-    <None Include="dllmain.def">
+    <ClCompile Include="..\ModHook\ModHook.cpp">
       <Filter>Source Files</Filter>
-    </None>
+    </ClCompile>
   </ItemGroup>
 </Project>

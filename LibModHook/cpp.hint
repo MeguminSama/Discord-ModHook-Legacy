@@ -1,0 +1,1 @@
+#define LIBMODHOOK_API __declspec(dllexport)

@@ -5,8 +5,6 @@ int hookExecutable(std::string executable)
 	auto pInjectDllPath = std::string("ModHookInjection.dll");
 	auto szInjectDllFullPath = std::filesystem::absolute(pInjectDllPath).string();
 
-	LPCSTR DllsToInject[1] = {szInjectDllFullPath.data()};
-
 	PROCESS_INFORMATION ProcessInfo;
 	memset((void *)&ProcessInfo, 0, sizeof(ProcessInfo));
 

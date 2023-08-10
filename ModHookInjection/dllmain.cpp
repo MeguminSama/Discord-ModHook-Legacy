@@ -1,37 +1,79 @@
 #include "ModHookInjection.h"
 
-// a blank exported function - this will be ordinal #1
-__declspec(dllexport) void CALLBACK DetourFinishHelperProcess()
-{
-	// Do Nothing
-}
-
 static decltype(&CreateFileW) o_CreateFileW = CreateFileW;
 static decltype(&GetFileAttributesW) o_GetFileAttributesW = GetFileAttributesW;
 static decltype(&CreateProcessW) o_CreateProcessW = CreateProcessW;
 
-bool vencordIsLoaded = false;
+static LPWSTR COMMAND_LINE_ARGS = GetCommandLineW();
+
+std::wstring modHookCustomAsar = L"";
+std::wstring modHookAsarHookToggleQuery = L"";
+std::wstring modHookOriginalAsarName = L"";
+
+bool modIsLoaded = false;
+
+void parseCommandLineArgs(LPWSTR args)
+{
+	int argCount;
+	LPWSTR *argList = CommandLineToArgvW(COMMAND_LINE_ARGS, &argCount);
+
+	for (int i = 0; i < argCount; i++)
+	{
+		std::wstring arg = std::wstring(argList[i]);
+		if (arg.find(L"--modhook-custom-asar=") != std::wstring::npos)
+		{
+			auto pos = arg.find(L"--modhook-custom-asar=");
+			arg.replace(pos, wcslen(L"--modhook-custom-asar="), L"");
+			modHookCustomAsar = arg;
+		}
+		else if (arg.find(L"--modhook-asar-hook-toggle-query=") != std::wstring::npos)
+		{
+			auto pos = arg.find(L"--modhook-asar-hook-toggle-query=");
+			arg.replace(pos, wcslen(L"--modhook-asar-hook-toggle-query="), L"");
+			modHookAsarHookToggleQuery = arg;
+		}
+		else if (arg.find(L"--modhook-original-asar-name=") != std::wstring::npos)
+		{
+			auto pos = arg.find(L"--modhook-original-asar-name=");
+			arg.replace(pos, wcslen(L"--modhook-original-asar-name="), L"");
+			modHookOriginalAsarName = arg;
+		}
+	}
+
+	if (modHookCustomAsar.empty())
+	{
+		MessageBoxW(NULL, L"modHookCustomAsar is empty", L"modHookCustomAsar", MB_OK);
+	}
+	if (modHookAsarHookToggleQuery.empty())
+	{
+		MessageBoxW(NULL, L"modHookAsarHookToggleQuery is empty", L"modHookAsarHookToggleQuery", MB_OK);
+	}
+	if (modHookOriginalAsarName.empty())
+	{
+		MessageBoxW(NULL, L"modHookOriginalAsarName is empty", L"modHookOriginalAsarName", MB_OK);
+	}
+}
 
 std::wstring handle_path(std::wstring path)
 {
-	if (path.find(L"Vencord") != std::wstring::npos)
+	if (path.find(modHookAsarHookToggleQuery) != std::wstring::npos)
 	{
-		vencordIsLoaded = true;
+		modIsLoaded = true;
 	}
 
-	if (path.ends_with(L"resources\\_app.asar"))
+	if (path.ends_with(modHookOriginalAsarName))
 	{
-		auto pos = path.find(L"resources\\_app.asar");
-		path.replace(pos, wcslen(L"resources\\_app.asar"), L"resources\\app.asar");
+		auto pos = path.length() - modHookOriginalAsarName.length();
+		path.replace(pos, modHookOriginalAsarName.length(), L"app.asar");
 		return path;
 	}
 
-	if (vencordIsLoaded)
+	if (modIsLoaded)
 		return path;
 
-	if (path.ends_with(L"resources\\app.asar"))
+	if (path.ends_with(L"app.asar"))
 	{
-		return std::wstring(L".\\resources\\vencord.asar");
+		return std::wstring(modHookCustomAsar.data());
 	}
 
 	return path;
@@ -70,7 +112,6 @@ static BOOL WINAPI CreateProcessW_wrap(
 		_In_ LPSTARTUPINFOW lpStartupInfo,
 		_Out_ LPPROCESS_INFORMATION lpProcessInformation)
 {
-	MessageBoxW(NULL, lpCommandLine, L"ModHookInjection", 0);
 	if (std::wstring(lpCommandLine).find(L"--type=renderer") == std::wstring::npos)
 	{
 		return o_CreateProcessW(lpApplicationName, lpCommandLine, lpProcessAttributes, lpThreadAttributes, bInheritHandles, dwCreationFlags, lpEnvironment, lpCurrentDirectory, lpStartupInfo, lpProcessInformation);
@@ -79,7 +120,13 @@ static BOOL WINAPI CreateProcessW_wrap(
 	std::filesystem::path pInjectDllPath = std::wstring(L"ModHookInjection.dll");
 	auto szInjectDllFullPath = std::filesystem::absolute(pInjectDllPath).string();
 
-	BOOL success = DetourCreateProcessWithDllExW(lpApplicationName, lpCommandLine, lpProcessAttributes, lpThreadAttributes, bInheritHandles, dwCreationFlags, lpEnvironment, lpCurrentDirectory, lpStartupInfo, lpProcessInformation, szInjectDllFullPath.data(), o_CreateProcessW);
+	auto newCommandLine = std::format(L"{} --modhook-custom-asar={} --modhook-asar-hook-toggle-query={} --modhook-original-asar-name={}",
+																		lpCommandLine,
+																		modHookCustomAsar,
+																		modHookAsarHookToggleQuery,
+																		modHookOriginalAsarName);
+
+	BOOL success = DetourCreateProcessWithDllExW(lpApplicationName, newCommandLine.data(), lpProcessAttributes, lpThreadAttributes, bInheritHandles, dwCreationFlags, lpEnvironment, lpCurrentDirectory, lpStartupInfo, lpProcessInformation, szInjectDllFullPath.data(), o_CreateProcessW);
 
 	if (!success)
 	{
@@ -95,13 +142,13 @@ static BOOL WINAPI CreateProcessW_wrap(
 BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpReserved)
 {
 	if (DetourIsHelperProcess())
-	{
 		return 1;
-	}
 
 	if (fdwReason == DLL_PROCESS_ATTACH)
 	{
-		MessageBoxW(NULL, L"ModHookInjection.dll loading", std::format(L"{}", DetourRestoreAfterWith()).data(), 0);
+		DetourRestoreAfterWith();
+
+		parseCommandLineArgs(COMMAND_LINE_ARGS);
 
 		DetourTransactionBegin();
 		DetourUpdateThread(GetCurrentThread());
@@ -109,8 +156,6 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpReserved)
 		DetourAttach(&(PVOID &)o_CreateFileW, CreateFileW_wrap);
 		DetourAttach(&(PVOID &)o_GetFileAttributesW, GetFileAttributesW_wrap);
 		DetourAttach(&(PVOID &)o_CreateProcessW, CreateProcessW_wrap);
-
-		MessageBoxW(NULL, L"ModHookInjection.dll loaded", std::format(L"{}", GetCurrentProcessId()).data(), 0);
 
 		DetourTransactionCommit();
 	}

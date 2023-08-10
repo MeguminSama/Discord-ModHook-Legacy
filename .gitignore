@@ -1,6 +1,8 @@
 .vs
+.vscode
 
 bin
 
 ModHook/.obj
 ModHookInjection/.obj
+LibModHook/.obj

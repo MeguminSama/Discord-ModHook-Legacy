@@ -6,4 +6,5 @@
 #include <string_view>
 #include <format>
 #include <filesystem>
+#include <shellapi.h>
 #include "ModHook.h"
