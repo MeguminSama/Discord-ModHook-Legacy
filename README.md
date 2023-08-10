@@ -4,33 +4,29 @@
 
 ### Inject mods into Discord without modifying any of Discord's files!
 
-## Configuration
+## Building
 
-- Edit `ModHook/resources/vencord.asar/index.js` to point to your vencord `dist/patcher.js` file.
-- Edit `EXE_PATH` in `ModHook.h` to point to your `Discord.exe` (note: NOT Update.exe).
+This uses MSBuild. No commandline instructions available yet.
+
+You'll need Visual Studio (only tested on vs2022).
+
+Make sure you're targeting a Release build on x64.
+
+`ModHookInjection.dll` is 32bit, even though it appears in the bin/x64 folder.
+This is because Discord is a 32bit program, so the DLL needs to be 32bit.
+However the injector `LibModHook.dll` can (and should) be x64.
 
 ## Caveats
 
-Windows only... for now (until I get the windows version in a state I'm happy with)
-
-Currently the script copies `app.asar` to `_app.asar` in order to function, even though they're the same file.
-This is because I haven't found an easy way to differentiate between win32 calls to the "modified" asar file (whenever it needs to call `resources/vencord.asasr`)
-and the "original" asar file (whenever it needs to call `app.asar` in %localappdata%)
-
-Some help for this would be much appreciated!!!
-
-## Building
-
-```shell
-cmake --preset x86-release
-cmake --build out/build/x86-release
-```
-
-The files should now be in `out/build/x86-release/`.
+Windows only... unless someone wants to PR linux support.
 
 ## Running
 
-Just run `ModHook.exe` from inside `out/build/x86-release` and it should launch Discord with Vencord loaded.
+To use the library, you need `LibModHook.dll` and `ModHookInjection.dll`.
+
+You can see an example using ModHook in [my JavaScript library for ModHook](https://github.com/MeguminSama/Discord-Modhook-JS)
+
+`ModHook.exe` is a proof-of-concept loader. You will need to change the source to use it.
 
 ## Why not 64-bit?
 
