@@ -22,6 +22,8 @@ Windows only... unless someone wants to PR linux support.
 
 ## Running
 
+A pre-made GUI for this is available at https://github.com/MeguminSama/Discord-ModLoader
+
 To use the library, you need `LibModHook.dll` and `ModHookInjection.dll`.
 
 You can see an example using ModHook in [my JavaScript library for ModHook](https://github.com/MeguminSama/Discord-Modhook-JS)
