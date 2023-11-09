@@ -1,5 +1,10 @@
 # Discord ModHook
 
+# This project has moved!
+
+A much better rewrite (with x64 support) is available at https://github.com/MeguminSama/Modhook although it has no GUI currently.
+
+
 ## In-Memory Mod Injection
 
 ### Inject mods into Discord without modifying any of Discord's files!
